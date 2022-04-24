@@ -29,7 +29,7 @@ BINDIR  = ./bin
 
 src = $(addprefix $(SRCDIR)/, $(addsuffix .f90, $(1)))
 obj = $(addprefix $(OBJDIR)/, $(addsuffix .o, $(1)))
-SRC  = $(call src, MTypes MDimension3D MUtil MTime BinFilesVF MCells MConfig MContacts mFluid MForces MDEM DEM)
+SRC  = $(call src, MTypes MDimension3D MUtil MTime BinFiles MCells MConfig MContacts mFluid MForces MDEM DEM)
 OBJ  = $(patsubst $(SRCDIR)/%.f90,$(OBJDIR)/%.o,$(SRC))
 
 all: $(BINDIR)/dem3d
@@ -58,26 +58,26 @@ $(OBJDIR)/MForces.o: $(SRCDIR)/MForces.f90 $(call obj, MTypes MDimension3D MCell
 $(OBJDIR)/mFluid.o: $(SRCDIR)/mFluid.f90 $(call obj, MTypes MDimension3D MConfig MUtil)
 	$(FORT) $(FOPTS) -J$(OBJDIR) -c -o $@ $<
 
-$(OBJDIR)/MContacts.o: $(SRCDIR)/MContacts.f90 $(call obj, MTypes MDimension3D BinFilesVF)
+$(OBJDIR)/MContacts.o: $(SRCDIR)/MContacts.f90 $(call obj, MTypes MDimension3D BinFiles)
 	$(FORT) $(FOPTS) -J$(OBJDIR) -c -o $@ $<
 
 $(OBJDIR)/MConfig.o: $(SRCDIR)/MConfig.f90 $(call obj, MDimension3D MUtil)
 	$(FORT) $(FOPTS) -J$(OBJDIR) -c -o $@ $<
 
-$(OBJDIR)/MCells.o: $(SRCDIR)/MCells.f90 $(call obj, MTypes BinFilesVF)
+$(OBJDIR)/MCells.o: $(SRCDIR)/MCells.f90 $(call obj, MTypes BinFiles)
 	$(FORT) $(FOPTS) -J$(OBJDIR) -c -o $@ $<
 
-$(OBJDIR)/MUtil.o: $(SRCDIR)/MUtil.f90 $(call obj, MTypes BinFilesVF)
+$(OBJDIR)/MUtil.o: $(SRCDIR)/MUtil.f90 $(call obj, MTypes BinFiles)
 	$(FORT) $(FOPTS) -J$(OBJDIR) -c -o $@ $<
 
-$(OBJDIR)/MDimension3D.o: $(SRCDIR)/MDimension3D.f90 $(call obj, MTypes BinFilesVF)
+$(OBJDIR)/MDimension3D.o: $(SRCDIR)/MDimension3D.f90 $(call obj, MTypes BinFiles)
 	$(FORT) $(FOPTS) -J$(OBJDIR) -c -o $@ $<
 
 $(OBJDIR)/MTime.o: $(SRCDIR)/MTime.f90
 	mkdir -p $(OBJDIR)
 	$(FORT) $(FOPTS) -J$(OBJDIR) -c -o $@ $<
 
-$(OBJDIR)/BinFilesVF.o: $(SRCDIR)/BinFilesVF.f90
+$(OBJDIR)/BinFiles.o: $(SRCDIR)/BinFiles.f90
 	mkdir -p $(OBJDIR)
 	$(FORT) $(FOPTS) -J$(OBJDIR) -c -o $@ $<
 
