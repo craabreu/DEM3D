@@ -55,9 +55,7 @@ integer(ib) :: NumberOfInterruptions
 character(28) :: StartTime, FinishTime
 character(28), allocatable :: Interruption(:), Retaking(:)
 
-integer(ib) :: Step, Conf, Nconf, NDigits, MyNP, iTable = 0_ib, i
-
-real(rb), allocatable :: VS(:,:)
+integer(ib) :: Step, Conf, Nconf, NDigits, MyNP, iTable = 0_ib
 
 !============================== Executable  code ===============================
 
@@ -67,19 +65,10 @@ write(*,'("|",13(" "),"Discrete Element Method",14(" "),"|")')
 write(*,'("+",50("-"),"+")')
 
 call ReadSpecifications( 5 )
-
-En = 1.0_rb
-Et = 1.0_rb
-Enw = 1.0_rb
-Etw = 1.0_rb
-Gravity = 0.0_rb
-FluidFlow = .false.
-
 call CalculateProperties( NC, NW )
 write(*,'("Total number of time steps: ",I10)') NumberOfSteps
 call ScaleVariables
 call InitializeAuxiliaries
-
 
 if (Resume) then
   if (Exists(StateFile)) then
@@ -89,11 +78,9 @@ if (Resume) then
   else
     call InitializeState
   end if
+else
+  call InitializeState
 end if
-
-do i = 1, NP
-  Particle(i)%Velocity = 0.001_rb*RandomUnitVector( Dummy )
-end do
 
 if (.not.Finished) then
 
@@ -113,7 +100,6 @@ if (.not.Finished) then
 
   call FinalizeDEM
 
-  forall (i=1:NP) Particle(i)%Velocity = 0.0_rb
   call SaveConfiguration( ConfigFile, Complete )
 
   Duration = Startup + ElapsedTime()
@@ -142,30 +128,28 @@ contains
 
     integer(ib), intent(in) :: Step
 
+    integer(ib)  :: i
+    real(rb)     :: V(NC)
+    character(3) :: CC
+
     Finished = Step == NumberOfSteps
 
     if ( mod(Step,ISaveSnapshot) == 0 ) then
       Conf = Conf + 1_ib
-      allocate( VS(3,NP) )
-      do i = 1, NP
-        VS(:,i) = Particle(i)%Velocity
-        Particle(i)%Velocity = 0.0_rb
-      end do
       call SaveConfiguration( FileSeries(ConfigFile,Conf,NDigits), Compact )
-      do i = 1, NP
-        Particle(i)%Velocity = VS(:,i)
-      end do
-      deallocate( VS )
     end if
+
+    write(CC,'(I3)') NC
 
     if ( (mod(Step,IShow) == 0) .or. Finished ) then
 
       call ShowTable( Step )
 
       open( unit=Outlet, file=OutletFile, status='old', position='append' )
-      write(Outlet,*) TimeScale*Time, ",", &
-                      LengthScale*sum(Particle%Position(3))/NP, ",", &
-                      Ncol
+      do i = 1, NC
+        V(i) = LengthScale/TimeScale*sum(Particle%Velocity(3),Particle%Index == i)/count(Particle%Index == i)
+      end do
+      write(Outlet,'(ES15.7,'//CC//'(",",ES15.7),",",I10)') TimeScale*Time, V, Ncol
       close(Outlet)
 
     end if
@@ -206,14 +190,10 @@ contains
       write(*,'("+",15("-"),"+",15("-"),"+",15("-"),"+",17("-"),"+")')
       write(*,'("|     Time      |   Particles   '// &
                 '|   Concluded   |    Real Time    |")')
-!      write(*,'("|     Time      |  Max. Height  '// &
-!                '|   Concluded   |    Real Time    |")')
       write(*,'("+",15("-"),"+",15("-"),"+",15("-"),"+",17("-"),"+")')
     end if
-if (NP > 0)     write(*,'("|",F12.5," s |",I14," |",F12.2," % |",A14," h |",E12.5)') &
-          TimeSI, NP, Percentage, Elapsed, LengthScale*Particle(1)%Velocity(3)/TimeScale
-!    write(*,'("|",F12.5," s |",F12.5," m |",F12.2," % |",A14," h |")') &
-!          TimeSI, LengthScale*maxval(Particle%Position(dim) + 0.5_rb*Lbox(dim)), Percentage, Elapsed
+    write(*,'("|",F12.5," s |",I14," |",F12.2," % |",A14," h |")') &
+          TimeSI, NP, Percentage, Elapsed
     if ( Finished ) then
       write(*,'("+",15("-"),"+",15("-"),"+",15("-"),"+",17("-"),"+")')
     end if
@@ -950,8 +930,7 @@ if (NP > 0)     write(*,'("|",F12.5," s |",I14," |",F12.2," % |",A14," h |",E12.
 
     ! Open the outlet file:
     open( unit = Outlet, file = OutletFile, status = 'replace' )
-!    write(Outlet,'("'//trim(OutletTitles(NC))//'")')
-    write(Outlet,'("Time(s), <H>(m), Ncol")')
+    write(Outlet,'("'//trim(OutletTitles(NC))//'")')
     close(Outlet)
     MyNP = NP
 
@@ -1140,8 +1119,8 @@ if (NP > 0)     write(*,'("|",F12.5," s |",I14," |",F12.2," % |",A14," h |",E12.
     if (.not.Exists(OutletFile)) then
       write(*,*) 'Warning: The outlet file was not found. Creating a new one.'
       open( unit = Outlet, file = OutletFile, status = 'replace' )
-      !write(Outlet,'("'//trim(OutletTitles(NC))//'")')
-      write(Outlet,'("Time(s), <H>(m)")')
+      write(Outlet,'("'//trim(OutletTitles(NC))//'")')
+      !write(Outlet,'("Time(s), <Vt1>(m/s), <Vt2>(m/s), Ncol")')
       close(Outlet)
     end if
     MyNP = NP
@@ -1167,9 +1146,9 @@ if (NP > 0)     write(*,'("|",F12.5," s |",I14," |",F12.2," % |",A14," h |",E12.
     Titles = "Time(s)"
     do Index = 1_ib, NC
       write(StrIndex,'(I5)') Index
-      Titles = trim(Titles)//" NP["//trim(adjustl(StrIndex))//"] "
+      Titles = trim(Titles)//", V"//trim(adjustl(StrIndex))
     end do
-    Titles = trim(Titles)//" NP"
+    Titles = trim(Titles)//", Ncol"
 
   end function OutletTitles
 
