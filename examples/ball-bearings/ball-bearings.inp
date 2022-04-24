@@ -1,0 +1,80 @@
+[Box dimensions (m)]
+0.11 0.11 0.05
+[Number of components - NC]
+1
+[Component properties (NC rows): Initial Number, Diameter(m), Density(Kg/m^3), StiffNess(N/m), Shear StiffNess(N/m)]
+0 0.01 7.8e3 1.e5 1.e5
+[Read the initial configuration? (If yes, just type the file name)]
+no
+[Promote particle pouring? (If yes, just type the pouring file name)]
+ball-bearings.prg
+[Number of Walls - NW]
+5
+[Wall properties (NW rows): Shape*, L1(m), L2(m), L3(m), Stiffness(N/m), Shear-StiffNess(N/m), Position(m), U, W]
+2  0.015  0.070  0.070   1.e5    1.e5   0.01 0.0 -0.0165   0. 0. 1.   0. 1. 0.
+2  0.000  0.000  0.070   1.e5    1.e5   0.01 0.0 -0.0240   0. 0. 1.   0. 1. 0.
+2  0.016  0.072  0.072   1.e5    1.e5   0.01 0.0 -0.0170   0. 0. 1.   0. 1. 0.
+2  0.000  0.000  0.072   1.e5    1.e5   0.01 0.0 -0.0250   0. 0. 1.   0. 1. 0.
+2  0.000  0.070  0.072   1.e5    1.e5   0.01 0.0 -0.0090   0. 0. 1.   0. 1. 0.
+[Normal coefficients of restitution of the component-component pairs (NC by NC matrix)]
+0.7
+[Tangential coefficients of restitution of the component-component pairs (NC by NC matrix)]
+0.7
+[Coefficients of friction of the component-component pairs (NC by NC matrix)]
+0.3
+[Normal coefficients of restitution of the component-wall pairs (NC by NW matrix)]
+0.7 0.7 0.7 0.7 0.7 0.7 0.7
+[Tangential coefficients of restitution of the component-wall pairs (NC by NW matrix)]
+0.7 0.7 0.7 0.7 0.7 0.7 0.7
+[Coefficients of friction of the component-wall pairs (NC by NW matrix)]
+0.3 0.3 0.3 0.3 0.3 0.3 0.3
+[Periodical Boundary Conditions]
+F F F
+[Gravity Acceletarion Vector (m/s^2)]
+0.0 0.0 -9.8
+[Fluid density (Kg/m^3)]
+0.0
+[Seed for random number generation (a negative integer)]
+-20
+[Base for file names (with no extention; maximum 100 characters)]
+ball-bearings
+[Total time to be simulated (s)]
+30.e0
+[Minimum number of time steps per collision]
+10.
+[Order of the predictor-corrector integration method (1-4)]
+4
+[Number of intervals in each initial euler time step]
+100
+[Time interval for saving the state of the simulation (s)]
+0.04e0
+[Time interval for saving snapshots of the simulation (s)]
+0.04e0
+[Time interval for reporting the progress of the simulation (s)]
+0.04e0
+[Resume simulation (if it was interrupted)?]
+yes
+[Move walls?]
+yes
+[Vectors A (m), f (1/s), and Ø for wall velocities: V = -2*Pi*A*sin(2*Pi*(f*t + Ø)); (NW rows)]
+0.01 0.01 0.00   1.5 1.5 1.5   0.0 -0.25 0.0
+0.01 0.01 0.00   1.5 1.5 1.5   0.0 -0.25 0.0
+0.01 0.01 0.00   1.5 1.5 1.5   0.0 -0.25 0.0
+0.01 0.01 0.00   1.5 1.5 1.5   0.0 -0.25 0.0
+0.01 0.01 0.00   1.5 1.5 1.5   0.0 -0.25 0.0
+[Simulate fluid flow?]
+no
+
+
+* Shape = 1 - Flat wall:
+      L1: Length in the direction of U
+      L2: Length in the transversal direction [W - (W.dot.U)/(U.dot.U)*U]
+      L3: Anything
+      U and W: Linearly independent vectors denoting the wall plan
+
+  Shape = 2 - Conic wall:
+      L1: Height
+      L2: Anterior diameter
+      L3: Posterior diameter
+      U:  Direction of the main axis of the wall
+      W:  Anything, provided that W and U are linearly independent
